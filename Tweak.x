@@ -1,4 +1,4 @@
-#import "../YouTubeHeader/YTISectionListRenderer.h"
+#import "../YouTubeHeader/YTIElementRenderer.h"
 
 %hook YTIPlayerResponse
 
@@ -30,22 +30,34 @@
 
 %end
 
+BOOL didLateHook = NO;
+
+%group LateHook
+
+%hook YTIElementRenderer
+
+- (NSData *)elementData {
+    if (self.hasCompatibilityOptions && self.compatibilityOptions.hasAdLoggingData)
+        return nil;
+    return %orig;
+}
+
+%end
+
+%end
+
 %hook YTSectionListViewController
 
-- (void)loadWithModel:(YTISectionListRenderer *)model {
-    NSMutableArray <YTISectionListSupportedRenderers *> *contentsArray = model.contentsArray;
-    NSIndexSet *removeIndexes = [contentsArray indexesOfObjectsPassingTest:^BOOL(YTISectionListSupportedRenderers *renderers, NSUInteger idx, BOOL *stop) {
-        YTIItemSectionRenderer *sectionRenderer = renderers.itemSectionRenderer;
-        YTIItemSectionSupportedRenderers *firstObject = [sectionRenderer.contentsArray firstObject];
-        YTIElementRenderer *objectRenderer = firstObject.elementRenderer;
-        // BOOL isShorts = [[objectRenderer description] containsString:@"shorts_shelf"];
-        BOOL isSearchAd = objectRenderer.hasCompatibilityOptions && objectRenderer.compatibilityOptions.hasAdLoggingData;
-        BOOL isPromotedVideo = firstObject.hasPromotedVideoRenderer || firstObject.hasCompactPromotedVideoRenderer || firstObject.hasPromotedVideoInlineMutedRenderer;
-        BOOL isValid = isSearchAd || isPromotedVideo;
-        return isValid;
-    }];
-    [contentsArray removeObjectsAtIndexes:removeIndexes];
+- (void)loadWithModel:(id)model {
+    if (!didLateHook) {
+        %init(LateHook);
+        didLateHook = YES;
+    }
     %orig;
 }
 
 %end
+
+%ctor {
+    %init;
+}
