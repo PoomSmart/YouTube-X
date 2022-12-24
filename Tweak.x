@@ -1,4 +1,4 @@
-#import "../YouTubeHeader/YTIElementRenderer.h"
+#import "../YouTubeHeader/YTISectionListRenderer.h"
 
 %hook YTIPlayerResponse
 
@@ -39,6 +39,9 @@ BOOL didLateHook = NO;
 - (NSData *)elementData {
     if (self.hasCompatibilityOptions && self.compatibilityOptions.hasAdLoggingData)
         return nil;
+    // NSString *description = [self description];
+    // if ([description containsString:@"product_carousel.eml"] || [description containsString:@"product_engagement_panel.eml"] || [description containsString:@"product_item.eml"])
+    //     return [NSData data];
     return %orig;
 }
 
@@ -48,11 +51,18 @@ BOOL didLateHook = NO;
 
 %hook YTSectionListViewController
 
-- (void)loadWithModel:(id)model {
+- (void)loadWithModel:(YTISectionListRenderer *)model {
     if (!didLateHook) {
         %init(LateHook);
         didLateHook = YES;
     }
+    NSMutableArray <YTISectionListSupportedRenderers *> *contentsArray = model.contentsArray;
+    NSIndexSet *removeIndexes = [contentsArray indexesOfObjectsPassingTest:^BOOL(YTISectionListSupportedRenderers *renderers, NSUInteger idx, BOOL *stop) {
+        YTIItemSectionRenderer *sectionRenderer = renderers.itemSectionRenderer;
+        YTIItemSectionSupportedRenderers *firstObject = [sectionRenderer.contentsArray firstObject];
+        return firstObject.hasPromotedVideoRenderer || firstObject.hasCompactPromotedVideoRenderer || firstObject.hasPromotedVideoInlineMutedRenderer;
+    }];
+    [contentsArray removeObjectsAtIndexes:removeIndexes];
     %orig;
 }
 
