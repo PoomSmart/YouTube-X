@@ -30,10 +30,6 @@
 
 %end
 
-BOOL didLateHook = NO;
-
-%group LateHook
-
 %hook YTIElementRenderer
 
 - (NSData *)elementData {
@@ -47,15 +43,9 @@ BOOL didLateHook = NO;
 
 %end
 
-%end
-
 %hook YTSectionListViewController
 
 - (void)loadWithModel:(YTISectionListRenderer *)model {
-    if (!didLateHook) {
-        %init(LateHook);
-        didLateHook = YES;
-    }
     NSMutableArray <YTISectionListSupportedRenderers *> *contentsArray = model.contentsArray;
     NSIndexSet *removeIndexes = [contentsArray indexesOfObjectsPassingTest:^BOOL(YTISectionListSupportedRenderers *renderers, NSUInteger idx, BOOL *stop) {
         YTIItemSectionRenderer *sectionRenderer = renderers.itemSectionRenderer;
@@ -67,7 +57,3 @@ BOOL didLateHook = NO;
 }
 
 %end
-
-%ctor {
-    %init;
-}
