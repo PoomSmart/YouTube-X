@@ -1,9 +1,11 @@
 Package: com.ps.ytx
 Name: YouTube X
-Version: 1.2.2
+Version: 1.2.2-1
 Architecture: iphoneos-arm
 Description: A lightweight YouTube improvement tweak.
 Maintainer: PoomSmart
 Author: PoomSmart
 Section: Tweaks
 Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 11.0), com.ps.ytabgoodies
+Depiction: https://poomsmart.github.io/repo/depictions/ytx.html
+SileoDepiction: https://poomsmart.github.io/repo/sileodepictions/ytx.json
