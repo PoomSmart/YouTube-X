@@ -35,9 +35,10 @@
 - (NSData *)elementData {
     if (self.hasCompatibilityOptions && self.compatibilityOptions.hasAdLoggingData)
         return nil;
-    // NSString *description = [self description];
-    // if ([description containsString:@"product_carousel.eml"] || [description containsString:@"product_engagement_panel.eml"] || [description containsString:@"product_item.eml"])
-    //     return [NSData data];
+    NSString *description = [self description];
+    // product_carousel.eml product_engagement_panel.eml product_item.eml
+    if ([description containsString:@"brand_promo.view"])
+        return [NSData data];
     return %orig;
 }
 
