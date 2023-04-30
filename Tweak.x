@@ -37,7 +37,7 @@
         return nil;
     NSString *description = [self description];
     // product_carousel.eml product_engagement_panel.eml product_item.eml
-    if ([description containsString:@"brand_promo.view"])
+    if ([description containsString:@"brand_promo.view"] || [description containsString:@"statement_banner.view"])
         return [NSData data];
     return %orig;
 }
