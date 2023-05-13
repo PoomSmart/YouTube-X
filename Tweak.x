@@ -21,10 +21,17 @@
 %hook YTDataUtils
 
 + (id)spamSignalsDictionary { return nil; }
++ (id)spamSignalsDictionaryWithoutIDFA { return nil; }
 
 %end
 
 %hook YTAdsInnerTubeContextDecorator
+
+- (void)decorateContext:(id)context {}
+
+%end
+
+%hook YTAccountScopedAdsInnerTubeContextDecorator
 
 - (void)decorateContext:(id)context {}
 
