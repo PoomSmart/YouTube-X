@@ -37,19 +37,18 @@
 
 %end
 
-%hook YTIElementRenderer
-
-- (NSData *)elementData {
-    if (self.hasCompatibilityOptions && self.compatibilityOptions.hasAdLoggingData)
-        return nil;
+BOOL isAd(YTIElementRenderer *self) {
+    if (self == nil) return NO;
+    if (self.hasCompatibilityOptions && self.compatibilityOptions.hasAdLoggingData) return YES;
     NSString *description = [self description];
-    // product_carousel.eml product_engagement_panel.eml product_item.eml
-    if ([description containsString:@"brand_promo"] || [description containsString:@"statement_banner"])
-        return [NSData data];
-    return %orig;
+    if ([description containsString:@"brand_promo"]
+        || [description containsString:@"statement_banner"]
+        || [description containsString:@"product_carousel"]
+        || [description containsString:@"product_engagement_panel"]
+        || [description containsString:@"product_item"])
+        return YES;
+    return NO;
 }
-
-%end
 
 %hook YTSectionListViewController
 
@@ -58,7 +57,7 @@
     NSIndexSet *removeIndexes = [contentsArray indexesOfObjectsPassingTest:^BOOL(YTISectionListSupportedRenderers *renderers, NSUInteger idx, BOOL *stop) {
         YTIItemSectionRenderer *sectionRenderer = renderers.itemSectionRenderer;
         YTIItemSectionSupportedRenderers *firstObject = [sectionRenderer.contentsArray firstObject];
-        return firstObject.hasPromotedVideoRenderer || firstObject.hasCompactPromotedVideoRenderer || firstObject.hasPromotedVideoInlineMutedRenderer;
+        return firstObject.hasPromotedVideoRenderer || firstObject.hasCompactPromotedVideoRenderer || firstObject.hasPromotedVideoInlineMutedRenderer || isAd(firstObject.elementRenderer);
     }];
     [contentsArray removeObjectsAtIndexes:removeIndexes];
     %orig;
