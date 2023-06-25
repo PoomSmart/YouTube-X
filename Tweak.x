@@ -1,5 +1,6 @@
 #import "../YouTubeHeader/_ASCollectionViewCell.h"
 #import "../YouTubeHeader/YTAsyncCollectionView.h"
+#import "../YouTubeHeader/YTVideoWithContextNode.h"
 #import "../YouTubeHeader/ELMCellNode.h"
 #import "../YouTubeHeader/ELMNodeController.h"
 
@@ -40,17 +41,22 @@
 
 %end
 
-BOOL isAd(ELMCellNode *node) {
-    ELMNodeController *controller = [node controller];
-    NSString *description = [controller description];
-    if ([description containsString:@"brand_promo"]
-        || [description containsString:@"statement_banner"]
-        || [description containsString:@"product_carousel"]
-        || [description containsString:@"product_engagement_panel"]
-        || [description containsString:@"product_item"]
-        || [description containsString:@"text_search_ad"]
-        || [description containsString:@"feed_ad_metadata"])
+BOOL isAd(id node) {
+    if ([node isKindOfClass:NSClassFromString(@"YTVideoWithContextNode")]
+        && [node respondsToSelector:@selector(parentResponder)]
+        && [[(YTVideoWithContextNode *)node parentResponder] isKindOfClass:NSClassFromString(@"YTAdVideoElementsCellController")])
         return YES;
+    if ([node isKindOfClass:NSClassFromString(@"ELMCellNode")]) {
+        NSString *description = [[[node controller] owningComponent] description];
+        if ([description containsString:@"brand_promo"]
+            || [description containsString:@"statement_banner"]
+            || [description containsString:@"product_carousel"]
+            || [description containsString:@"product_engagement_panel"]
+            || [description containsString:@"product_item"]
+            || [description containsString:@"text_search_ad"]
+            || [description containsString:@"feed_ad_metadata"])
+            return YES;
+    }
     return NO;
 }
 
@@ -60,8 +66,7 @@ BOOL isAd(ELMCellNode *node) {
     _ASCollectionViewCell *cell = %orig;
     if ([cell isKindOfClass:NSClassFromString(@"_ASCollectionViewCell")]
         && [cell respondsToSelector:@selector(node)]
-        && [cell isKindOfClass:NSClassFromString(@"ELMCellNode")]
-        && isAd((ELMCellNode *)[cell node]))
+        && isAd([cell node]))
             [self deleteItemsAtIndexPaths:[NSArray arrayWithObject:indexPath]];
     return cell;
 }
