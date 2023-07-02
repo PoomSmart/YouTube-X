@@ -1,4 +1,8 @@
-#import "../YouTubeHeader/YTISectionListRenderer.h"
+#import "../YouTubeHeader/_ASCollectionViewCell.h"
+#import "../YouTubeHeader/YTAsyncCollectionView.h"
+#import "../YouTubeHeader/YTVideoWithContextNode.h"
+#import "../YouTubeHeader/ELMCellNode.h"
+#import "../YouTubeHeader/ELMNodeController.h"
 
 %hook YTIPlayerResponse
 
@@ -37,30 +41,35 @@
 
 %end
 
-BOOL isAd(YTIElementRenderer *self) {
-    if (self == nil) return NO;
-    if (self.hasCompatibilityOptions && self.compatibilityOptions.hasAdLoggingData) return YES;
-    NSString *description = [self description];
-    if ([description containsString:@"brand_promo"]
-        || [description containsString:@"statement_banner"]
-        || [description containsString:@"product_carousel"]
-        || [description containsString:@"product_engagement_panel"]
-        || [description containsString:@"product_item"])
+BOOL isAd(id node) {
+    if ([node isKindOfClass:NSClassFromString(@"YTVideoWithContextNode")]
+        && [node respondsToSelector:@selector(parentResponder)]
+        && [[(YTVideoWithContextNode *)node parentResponder] isKindOfClass:NSClassFromString(@"YTAdVideoElementsCellController")])
         return YES;
+    if ([node isKindOfClass:NSClassFromString(@"ELMCellNode")]) {
+        NSString *description = [[[node controller] owningComponent] description];
+        if ([description containsString:@"brand_promo"]
+            || [description containsString:@"statement_banner"]
+            || [description containsString:@"product_carousel"]
+            || [description containsString:@"product_engagement_panel"]
+            || [description containsString:@"product_item"]
+            || [description containsString:@"text_search_ad"]
+            || [description containsString:@"square_image_layout"] // install app ad
+            || [description containsString:@"feed_ad_metadata"])
+            return YES;
+    }
     return NO;
 }
 
-%hook YTSectionListViewController
+%hook YTAsyncCollectionView
 
-- (void)loadWithModel:(YTISectionListRenderer *)model {
-    NSMutableArray <YTISectionListSupportedRenderers *> *contentsArray = model.contentsArray;
-    NSIndexSet *removeIndexes = [contentsArray indexesOfObjectsPassingTest:^BOOL(YTISectionListSupportedRenderers *renderers, NSUInteger idx, BOOL *stop) {
-        YTIItemSectionRenderer *sectionRenderer = renderers.itemSectionRenderer;
-        YTIItemSectionSupportedRenderers *firstObject = [sectionRenderer.contentsArray firstObject];
-        return firstObject.hasPromotedVideoRenderer || firstObject.hasCompactPromotedVideoRenderer || firstObject.hasPromotedVideoInlineMutedRenderer || isAd(firstObject.elementRenderer);
-    }];
-    [contentsArray removeObjectsAtIndexes:removeIndexes];
-    %orig;
+- (id)collectionView:(id)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    _ASCollectionViewCell *cell = %orig;
+    if ([cell isKindOfClass:NSClassFromString(@"_ASCollectionViewCell")]
+        && [cell respondsToSelector:@selector(node)]
+        && isAd([cell node]))
+            [self deleteItemsAtIndexPaths:[NSArray arrayWithObject:indexPath]];
+    return cell;
 }
 
 %end
