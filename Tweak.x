@@ -63,7 +63,7 @@ BOOL isAd(id node) {
 
 %hook YTAsyncCollectionView
 
-- (id)cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+- (id)collectionView:(id)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     _ASCollectionViewCell *cell = %orig;
     if ([cell isKindOfClass:NSClassFromString(@"_ASCollectionViewCell")]
         && [cell respondsToSelector:@selector(node)]
