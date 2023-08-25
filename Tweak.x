@@ -1,6 +1,7 @@
 #import "../YouTubeHeader/_ASCollectionViewCell.h"
 #import "../YouTubeHeader/YTAsyncCollectionView.h"
 #import "../YouTubeHeader/YTVideoWithContextNode.h"
+#import "../YouTubeHeader/YTIElementRenderer.h"
 #import "../YouTubeHeader/ELMCellNode.h"
 #import "../YouTubeHeader/ELMNodeController.h"
 
@@ -38,6 +39,15 @@
 %hook YTAccountScopedAdsInnerTubeContextDecorator
 
 - (void)decorateContext:(id)context {}
+
+%end
+
+%hook YTIElementRenderer
+
+- (NSData *)elementData {
+    if (self.hasCompatibilityOptions && self.compatibilityOptions.hasAdLoggingData) return nil;
+    return %orig;
+}
 
 %end
 
