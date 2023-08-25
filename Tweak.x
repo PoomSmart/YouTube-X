@@ -56,7 +56,9 @@ BOOL isAd(id node) {
             || [description containsString:@"text_search_ad"]
             || [description containsString:@"text_image_button_layout"]
             || [description containsString:@"carousel_headered_layout"]
+            || [description containsString:@"carousel_footered_layout"]
             || [description containsString:@"square_image_layout"] // install app ad
+            || [description containsString:@"landscape_image_wide_button_layout"]
             || [description containsString:@"feed_ad_metadata"])
             return YES;
     }
@@ -67,10 +69,11 @@ BOOL isAd(id node) {
 
 - (id)collectionView:(id)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     _ASCollectionViewCell *cell = %orig;
-    if ([cell isKindOfClass:NSClassFromString(@"_ASCollectionViewCell")]
-        && [cell respondsToSelector:@selector(node)]
-        && isAd([cell node]))
-            [self deleteItemsAtIndexPaths:[NSArray arrayWithObject:indexPath]];
+    if ([cell isKindOfClass:NSClassFromString(@"YTCompactPromotedVideoCell")]
+        || ([cell isKindOfClass:NSClassFromString(@"_ASCollectionViewCell")]
+            && [cell respondsToSelector:@selector(node)]
+            && isAd([cell node])))
+                [self deleteItemsAtIndexPaths:[NSArray arrayWithObject:indexPath]];
     return cell;
 }
 
