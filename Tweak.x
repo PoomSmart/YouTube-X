@@ -78,7 +78,7 @@ BOOL isAd(id node) {
 %hook YTAsyncCollectionView
 
 - (id)collectionView:(id)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-    _ASCollectionViewCell *cell = %orig;
+    id cell = %orig;
     if ([cell isKindOfClass:NSClassFromString(@"YTCompactPromotedVideoCell")]
         || ([cell isKindOfClass:NSClassFromString(@"_ASCollectionViewCell")]
             && [cell respondsToSelector:@selector(node)]
