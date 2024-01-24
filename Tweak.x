@@ -5,6 +5,12 @@
 #import "../YouTubeHeader/ELMCellNode.h"
 #import "../YouTubeHeader/ELMNodeController.h"
 
+%hook YTGlobalConfig
+
+- (BOOL)shouldBlockUpgradeDialog { return YES; }
+
+%end
+
 %hook YTIPlayerResponse
 
 - (BOOL)isMonetized { return NO; }
