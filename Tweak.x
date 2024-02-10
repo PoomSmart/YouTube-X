@@ -1,9 +1,9 @@
-#import "../YouTubeHeader/_ASCollectionViewCell.h"
-#import "../YouTubeHeader/YTAsyncCollectionView.h"
-#import "../YouTubeHeader/YTVideoWithContextNode.h"
-#import "../YouTubeHeader/YTIElementRenderer.h"
-#import "../YouTubeHeader/ELMCellNode.h"
-#import "../YouTubeHeader/ELMNodeController.h"
+#import <YouTubeHeader/_ASCollectionViewCell.h>
+#import <YouTubeHeader/YTAsyncCollectionView.h>
+#import <YouTubeHeader/YTVideoWithContextNode.h>
+#import <YouTubeHeader/YTIElementRenderer.h>
+#import <YouTubeHeader/ELMCellNode.h>
+#import <YouTubeHeader/ELMNodeController.h>
 
 %hook YTGlobalConfig
 
