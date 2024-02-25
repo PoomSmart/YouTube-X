@@ -1,9 +1,8 @@
-#import <YouTubeHeader/_ASCollectionViewCell.h>
-#import <YouTubeHeader/YTAsyncCollectionView.h>
-#import <YouTubeHeader/YTVideoWithContextNode.h>
-#import <YouTubeHeader/YTIElementRenderer.h>
+#import <YouTubeHeader/ASCollectionElement.h>
 #import <YouTubeHeader/ELMCellNode.h>
 #import <YouTubeHeader/ELMNodeController.h>
+#import <YouTubeHeader/YTIElementRenderer.h>
+#import <YouTubeHeader/YTVideoWithContextNode.h>
 
 %hook YTGlobalConfig
 
@@ -81,16 +80,11 @@ BOOL isAd(id node) {
     return NO;
 }
 
-%hook YTAsyncCollectionView
+%hook ASCollectionView
 
-- (id)collectionView:(id)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-    id cell = %orig;
-    if ([cell isKindOfClass:NSClassFromString(@"YTCompactPromotedVideoCell")]
-        || ([cell isKindOfClass:NSClassFromString(@"_ASCollectionViewCell")]
-            && [cell respondsToSelector:@selector(node)]
-            && isAd([cell node])))
-                [self deleteItemsAtIndexPaths:[NSArray arrayWithObject:indexPath]];
-    return cell;
+- (CGSize)sizeForElement:(ASCollectionElement *)element {
+    ASCellNode *node = [element node];
+    return isAd(node) ? CGSizeZero : %orig;
 }
 
 %end
