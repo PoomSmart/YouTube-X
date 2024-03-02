@@ -65,7 +65,7 @@ BOOL isAd(id node) {
     if ([node isKindOfClass:NSClassFromString(@"ELMCellNode")]) {
         NSString *description = [[[node controller] owningComponent] description];
         if ([description containsString:@"brand_promo"]
-            || [description containsString:@"statement_banner"]
+            // || [description containsString:@"statement_banner"]
             // || [description containsString:@"product_carousel"]
             || [description containsString:@"shelf_header"]
             || [description containsString:@"product_engagement_panel"]
@@ -107,7 +107,8 @@ BOOL isAd(id node) {
                 YTIItemSectionRenderer *sectionRenderer = renderers.itemSectionRenderer;
                 YTIItemSectionSupportedRenderers *firstObject = [sectionRenderer.contentsArray firstObject];
                 YTIElementRenderer *elementRenderer = firstObject.elementRenderer;
-                return [[elementRenderer description] containsString:@"product_carousel"];
+                NSString *description = [elementRenderer description];
+                return [description containsString:@"product_carousel"] || [description containsString:@"statement_banner"];
             } @catch (id ex) {
                 return NO;
             }
