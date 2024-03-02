@@ -2,6 +2,7 @@
 #import <YouTubeHeader/ELMCellNode.h>
 #import <YouTubeHeader/ELMNodeController.h>
 #import <YouTubeHeader/YTIElementRenderer.h>
+#import <YouTubeHeader/YTISectionListRenderer.h>
 #import <YouTubeHeader/YTVideoWithContextNode.h>
 
 %hook YTGlobalConfig
@@ -65,7 +66,8 @@ BOOL isAd(id node) {
         NSString *description = [[[node controller] owningComponent] description];
         if ([description containsString:@"brand_promo"]
             || [description containsString:@"statement_banner"]
-            || [description containsString:@"product_carousel"]
+            // || [description containsString:@"product_carousel"]
+            || [description containsString:@"shelf_header"]
             || [description containsString:@"product_engagement_panel"]
             || [description containsString:@"product_item"]
             || [description containsString:@"text_search_ad"]
@@ -80,11 +82,39 @@ BOOL isAd(id node) {
     return NO;
 }
 
-%hook ASCollectionView
+%hook ASCollectionElement
 
-- (CGSize)sizeForElement:(ASCollectionElement *)element {
-    ASCellNode *node = [element node];
-    return isAd(node) ? CGSizeZero : %orig;
+- (ASSizeRange)constrainedSize {
+    ASSizeRange size = %orig;
+    ASCellNode *node = [self node];
+    if (isAd(node)) {
+        size.min = CGSizeZero;
+        size.max = CGSizeZero;
+        self.constrainedSize = size;
+    }
+    return size;
+}
+
+%end
+
+%hook YTInnerTubeCollectionViewController
+
+- (void)loadWithModel:(YTISectionListRenderer *)model {
+    @try {
+        NSMutableArray <YTISectionListSupportedRenderers *> *contentsArray = model.contentsArray;
+        NSIndexSet *removeIndexes = [contentsArray indexesOfObjectsPassingTest:^BOOL(YTISectionListSupportedRenderers *renderers, NSUInteger idx, BOOL *stop) {
+            @try {
+                YTIItemSectionRenderer *sectionRenderer = renderers.itemSectionRenderer;
+                YTIItemSectionSupportedRenderers *firstObject = [sectionRenderer.contentsArray firstObject];
+                YTIElementRenderer *elementRenderer = firstObject.elementRenderer;
+                return [[elementRenderer description] containsString:@"product_carousel"];
+            } @catch (id ex) {
+                return NO;
+            }
+        }];
+        [contentsArray removeObjectsAtIndexes:removeIndexes];
+    } @catch (id ex) {}
+    %orig;
 }
 
 %end
