@@ -5,6 +5,12 @@
 #import <YouTubeHeader/YTISectionListRenderer.h>
 #import <YouTubeHeader/YTVideoWithContextNode.h>
 
+%hook YTHotConfig
+
+- (BOOL)premiumClientSharedConfigEnableAttestationForGetPremiumOnClient { return NO; }
+
+%end
+
 %hook YTGlobalConfig
 
 - (BOOL)shouldBlockUpgradeDialog { return YES; }
@@ -100,21 +106,19 @@ BOOL isAd(id node) {
 %hook YTInnerTubeCollectionViewController
 
 - (void)loadWithModel:(YTISectionListRenderer *)model {
-    @try {
+    if ([model isKindOfClass:%c(YTISectionListRenderer)]) {
         NSMutableArray <YTISectionListSupportedRenderers *> *contentsArray = model.contentsArray;
         NSIndexSet *removeIndexes = [contentsArray indexesOfObjectsPassingTest:^BOOL(YTISectionListSupportedRenderers *renderers, NSUInteger idx, BOOL *stop) {
-            @try {
-                YTIItemSectionRenderer *sectionRenderer = renderers.itemSectionRenderer;
-                YTIItemSectionSupportedRenderers *firstObject = [sectionRenderer.contentsArray firstObject];
-                YTIElementRenderer *elementRenderer = firstObject.elementRenderer;
-                NSString *description = [elementRenderer description];
-                return [description containsString:@"product_carousel"] || [description containsString:@"statement_banner"];
-            } @catch (id ex) {
+            if (![renderers isKindOfClass:%c(YTISectionListSupportedRenderers)])
                 return NO;
-            }
+            YTIItemSectionRenderer *sectionRenderer = renderers.itemSectionRenderer;
+            YTIItemSectionSupportedRenderers *firstObject = [sectionRenderer.contentsArray firstObject];
+            YTIElementRenderer *elementRenderer = firstObject.elementRenderer;
+            NSString *description = [elementRenderer description];
+            return [description containsString:@"product_carousel"] || [description containsString:@"statement_banner"];
         }];
         [contentsArray removeObjectsAtIndexes:removeIndexes];
-    } @catch (id ex) {}
+    }
     %orig;
 }
 
