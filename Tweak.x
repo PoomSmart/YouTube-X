@@ -5,9 +5,15 @@
 #import <YouTubeHeader/YTISectionListRenderer.h>
 #import <YouTubeHeader/YTVideoWithContextNode.h>
 
-%hook YTHotConfig
+%hook YTVersionUtils
 
-- (BOOL)premiumClientSharedConfigEnableAttestationForGetPremiumOnClient { return NO; }
+// Works down to 16.29.4
++ (NSString *)appVersion {
+    NSString *appVersion = %orig;
+    if ([appVersion compare:@"17.33.2" options:NSNumericSearch] == NSOrderedAscending)
+        return @"17.33.2";
+    return appVersion;
+}
 
 %end
 
@@ -37,68 +43,58 @@
 
 %hook YTDataUtils
 
-+ (id)spamSignalsDictionary { return nil; }
-+ (id)spamSignalsDictionaryWithoutIDFA { return nil; }
++ (id)spamSignalsDictionary { return @{}; }
++ (id)spamSignalsDictionaryWithoutIDFA { return @{}; }
 
 %end
 
 %hook YTAdsInnerTubeContextDecorator
 
-- (void)decorateContext:(id)context {}
+- (void)decorateContext:(id)context { %orig(nil); }
 
 %end
 
 %hook YTAccountScopedAdsInnerTubeContextDecorator
 
-- (void)decorateContext:(id)context {}
+- (void)decorateContext:(id)context { %orig(nil); }
 
 %end
+
+BOOL isAdString(NSString *description) {
+    if ([description containsString:@"brand_promo"]
+        // || [description containsString:@"statement_banner"]
+        // || [description containsString:@"product_carousel"]
+        || [description containsString:@"shelf_header"]
+        || [description containsString:@"product_engagement_panel"]
+        || [description containsString:@"product_item"]
+        || [description containsString:@"text_search_ad"]
+        || [description containsString:@"text_image_button_layout"]
+        || [description containsString:@"carousel_headered_layout"]
+        || [description containsString:@"carousel_footered_layout"]
+        || [description containsString:@"full_width_square_image_layout"]
+        || [description containsString:@"full_width_portrait_image_layout"]
+        || [description containsString:@"square_image_layout"] // install app ad
+        || [description containsString:@"landscape_image_wide_button_layout"]
+        || [description containsString:@"video_display_full_buttoned_layout"]
+        || [description containsString:@"home_video_with_context"]
+        || [description containsString:@"feed_ad_metadata"])
+        return YES;
+    return NO;
+}
+
+NSData *cellDividerData;
 
 %hook YTIElementRenderer
 
 - (NSData *)elementData {
-    if (self.hasCompatibilityOptions && self.compatibilityOptions.hasAdLoggingData) return nil;
+    NSString *description = [self description];
+    if ([description containsString:@"cell_divider"]) {
+        if (!cellDividerData) cellDividerData = %orig;
+        return cellDividerData;
+    }
+    if (self.hasCompatibilityOptions && self.compatibilityOptions.hasAdLoggingData) return cellDividerData;
+    // if (isAdString(description)) return cellDividerData;
     return %orig;
-}
-
-%end
-
-BOOL isAd(id node) {
-    if ([node isKindOfClass:NSClassFromString(@"YTVideoWithContextNode")]
-        && [node respondsToSelector:@selector(parentResponder)]
-        && [[(YTVideoWithContextNode *)node parentResponder] isKindOfClass:NSClassFromString(@"YTAdVideoElementsCellController")])
-        return YES;
-    if ([node isKindOfClass:NSClassFromString(@"ELMCellNode")]) {
-        NSString *description = [[[node controller] owningComponent] description];
-        if ([description containsString:@"brand_promo"]
-            // || [description containsString:@"statement_banner"]
-            // || [description containsString:@"product_carousel"]
-            || [description containsString:@"shelf_header"]
-            || [description containsString:@"product_engagement_panel"]
-            || [description containsString:@"product_item"]
-            || [description containsString:@"text_search_ad"]
-            || [description containsString:@"text_image_button_layout"]
-            || [description containsString:@"carousel_headered_layout"]
-            || [description containsString:@"carousel_footered_layout"]
-            || [description containsString:@"square_image_layout"] // install app ad
-            || [description containsString:@"landscape_image_wide_button_layout"]
-            || [description containsString:@"feed_ad_metadata"])
-            return YES;
-    }
-    return NO;
-}
-
-%hook ASCollectionElement
-
-- (ASSizeRange)constrainedSize {
-    ASSizeRange size = %orig;
-    ASCellNode *node = [self node];
-    if (isAd(node)) {
-        size.min = CGSizeZero;
-        size.max = CGSizeZero;
-        self.constrainedSize = size;
-    }
-    return size;
 }
 
 %end
@@ -115,7 +111,10 @@ BOOL isAd(id node) {
             YTIItemSectionSupportedRenderers *firstObject = [sectionRenderer.contentsArray firstObject];
             YTIElementRenderer *elementRenderer = firstObject.elementRenderer;
             NSString *description = [elementRenderer description];
-            return [description containsString:@"product_carousel"] || [description containsString:@"statement_banner"];
+            return isAdString(description)
+                || [description containsString:@"product_carousel"]
+                || [description containsString:@"post_shelf"]
+                || [description containsString:@"statement_banner"];
         }];
         [contentsArray removeObjectsAtIndexes:removeIndexes];
     }
