@@ -104,7 +104,7 @@ NSData *cellDividerData;
         if (!cellDividerData) cellDividerData = %orig;
         return cellDividerData;
     }
-    if ([self respondsToSelector:@selector(hasCompatibilityOptions)] && self.hasCompatibilityOptions && self.compatibilityOptions.hasAdLoggingData) return cellDividerData ?: %orig;
+    if ([self respondsToSelector:@selector(hasCompatibilityOptions)] && self.hasCompatibilityOptions && self.compatibilityOptions.hasAdLoggingData && cellDividerData) return cellDividerData;
     // if (isAdString(description)) return cellDividerData;
     return %orig;
 }
