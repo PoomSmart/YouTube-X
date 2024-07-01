@@ -200,7 +200,7 @@ static uint8_t cellDividerDataBytes[] = {
     NSString *description = [self description];
     NSString *adString = getAdString(description);
     if (adString) {
-        // HBLogInfo(@"YTX getAdString %@ %@", str, cellDividerData);
+        // HBLogInfo(@"YTX getAdString %@ %@", adString, cellDividerData);
         return cellDividerData;
     }
     return %orig;
