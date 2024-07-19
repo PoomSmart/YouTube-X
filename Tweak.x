@@ -1,7 +1,7 @@
 #import <YouTubeHeader/YTIElementRenderer.h>
 #import <YouTubeHeader/YTISectionListRenderer.h>
 #import <YouTubeHeader/YTReelModel.h>
-// #import <HBLog.h>
+#import <HBLog.h>
 
 %hook YTVersionUtils
 
@@ -77,6 +77,8 @@
 %end
 
 NSString *getAdString(NSString *description) {
+    if ([description containsString:@"ad_layout"])
+        return @"ad_layout";
     if ([description containsString:@"brand_promo"])
         return @"brand_promo";
     if ([description containsString:@"carousel_footered_layout"])
@@ -126,12 +128,12 @@ static __strong NSData *cellDividerData;
     }
     if (!cellDividerData) return %orig;
     if ([self respondsToSelector:@selector(hasCompatibilityOptions)] && self.hasCompatibilityOptions && self.compatibilityOptions.hasAdLoggingData) {
-        // HBLogInfo(@"YTX adLogging 1 %@", cellDividerData);
+        HBLogDebug(@"YTX adLogging 1 %@", cellDividerData);
         return cellDividerData;
     }
     NSString *adString = getAdString(description);
     if (adString) {
-        // HBLogInfo(@"YTX getAdString 1 %@ %@", adString, cellDividerData);
+        HBLogDebug(@"YTX getAdString 1 %@ %@", adString, cellDividerData);
         return cellDividerData;
     }
     return %orig;
@@ -151,13 +153,13 @@ static __strong NSData *cellDividerData;
             YTIItemSectionSupportedRenderers *firstObject = [sectionRenderer.contentsArray firstObject];
             YTIElementRenderer *elementRenderer = firstObject.elementRenderer;
             if ([elementRenderer respondsToSelector:@selector(hasCompatibilityOptions)] && elementRenderer.hasCompatibilityOptions && elementRenderer.compatibilityOptions.hasAdLoggingData) {
-                // HBLogInfo(@"YTX adLogging 2 %@", elementRenderer);
+                HBLogDebug(@"YTX adLogging 2 %@", elementRenderer);
                 return YES;
             }
             NSString *description = [elementRenderer description];
             NSString *adString = getAdString(description);
             if (adString) {
-                // HBLogInfo(@"YTX getAdString 2 %@ %@", adString, elementRenderer);
+                HBLogDebug(@"YTX getAdString 2 %@ %@", adString, elementRenderer);
                 return YES;
             }
             return NO;
