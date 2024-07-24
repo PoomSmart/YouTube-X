@@ -1,4 +1,5 @@
 #import <YouTubeHeader/YTIElementRenderer.h>
+#import <YouTubeHeader/YTInnerTubeCollectionViewController.h>
 #import <YouTubeHeader/YTISectionListRenderer.h>
 #import <YouTubeHeader/YTReelModel.h>
 #import <HBLog.h>
@@ -126,29 +127,51 @@ NSString *getAdString(NSString *description) {
     return nil;
 }
 
-%hook YTInnerTubeCollectionViewController
+static BOOL isAdRenderer(YTIElementRenderer *elementRenderer, int kind) {
+    if ([elementRenderer respondsToSelector:@selector(hasCompatibilityOptions)] && elementRenderer.hasCompatibilityOptions && elementRenderer.compatibilityOptions.hasAdLoggingData) {
+        HBLogDebug(@"YTX adLogging %d %@", kind, elementRenderer);
+        return YES;
+    }
+    NSString *description = [elementRenderer description];
+    NSString *adString = getAdString(description);
+    if (adString) {
+        HBLogDebug(@"YTX getAdString %d %@ %@", kind, adString, elementRenderer);
+        return YES;
+    }
+    return NO;
+}
 
-- (void)addSectionsFromArray:(NSArray <YTIItemSectionRenderer *> *)array {
+static NSMutableArray <YTIItemSectionRenderer *> *filteredArray(NSArray <YTIItemSectionRenderer *> *array) {
     NSMutableArray <YTIItemSectionRenderer *> *newArray = [array mutableCopy];
     NSIndexSet *removeIndexes = [newArray indexesOfObjectsPassingTest:^BOOL(YTIItemSectionRenderer *sectionRenderer, NSUInteger idx, BOOL *stop) {
         if (![sectionRenderer isKindOfClass:%c(YTIItemSectionRenderer)])
             return NO;
-        YTIItemSectionSupportedRenderers *firstObject = [sectionRenderer.contentsArray firstObject];
+        NSMutableArray <YTIItemSectionSupportedRenderers *> *contentsArray = sectionRenderer.contentsArray;
+        if (contentsArray.count > 1) {
+            NSIndexSet *removeContentsArrayIndexes = [contentsArray indexesOfObjectsPassingTest:^BOOL(YTIItemSectionSupportedRenderers *sectionSupportedRenderers, NSUInteger idx2, BOOL *stop2) {
+                YTIElementRenderer *elementRenderer = sectionSupportedRenderers.elementRenderer;
+                return isAdRenderer(elementRenderer, 3);
+            }];
+            [contentsArray removeObjectsAtIndexes:removeContentsArrayIndexes];
+        }
+        YTIItemSectionSupportedRenderers *firstObject = [contentsArray firstObject];
         YTIElementRenderer *elementRenderer = firstObject.elementRenderer;
-        if ([elementRenderer respondsToSelector:@selector(hasCompatibilityOptions)] && elementRenderer.hasCompatibilityOptions && elementRenderer.compatibilityOptions.hasAdLoggingData) {
-            HBLogDebug(@"YTX adLogging 2 %@", elementRenderer);
-            return YES;
-        }
-        NSString *description = [elementRenderer description];
-        NSString *adString = getAdString(description);
-        if (adString) {
-            HBLogDebug(@"YTX getAdString 2 %@ %@", adString, elementRenderer);
-            return YES;
-        }
-        return NO;
+        return isAdRenderer(elementRenderer, 2);
     }];
     [newArray removeObjectsAtIndexes:removeIndexes];
-    %orig(newArray.copy);
+    return newArray;
+}
+
+%hook YTInnerTubeCollectionViewController
+
+- (void)displaySectionsWithReloadingSectionControllerByRenderer:(id)renderer {
+    NSMutableArray *sectionRenderers = [self valueForKey:@"_sectionRenderers"];
+    [self setValue:filteredArray(sectionRenderers) forKey:@"_sectionRenderers"];
+    %orig;
+}
+
+- (void)addSectionsFromArray:(NSArray <YTIItemSectionRenderer *> *)array {
+    %orig(filteredArray(array));
 }
 
 %end
