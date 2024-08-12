@@ -124,6 +124,8 @@ NSString *getAdString(NSString *description) {
         return @"video_display_full_layout";
     if ([description containsString:@"video_display_full_buttoned_layout"])
         return @"video_display_full_buttoned_layout";
+    if ([description containsString:@"shopping_carousel"])
+        return @"shopping_carousel";
     return nil;
 }
 
