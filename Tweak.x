@@ -1,7 +1,6 @@
 #import <YouTubeHeader/YTIElementRenderer.h>
 #import <YouTubeHeader/YTInnerTubeCollectionViewController.h>
 #import <YouTubeHeader/YTISectionListRenderer.h>
-#import <YouTubeHeader/YTReelModel.h>
 #import <HBLog.h>
 
 %hook YTVersionUtils
@@ -26,11 +25,28 @@
 
 - (BOOL)isMonetized { return NO; }
 
+%new(@@:)
+- (NSMutableArray *)playerAdsArray {
+    return [NSMutableArray array];
+}
+
+%new(@@:)
+- (NSMutableArray *)adSlotsArray {
+    return [NSMutableArray array];
+}
+
 %end
 
 %hook YTIPlayabilityStatus
 
 - (BOOL)isPlayableInBackground { return YES; }
+
+%end
+
+%hook YTIClientMdxGlobalConfig
+
+%new(B@:)
+- (BOOL)enableSkippableAd { return YES; }
 
 %end
 
@@ -75,17 +91,6 @@
 %hook MDXSession
 
 - (void)adPlaying:(id)ad {}
-
-%end
-
-%hook YTReelInfinitePlaybackDataSource
-
-- (void)setReels:(NSMutableOrderedSet <YTReelModel *> *)reels {
-    [reels removeObjectsAtIndexes:[reels indexesOfObjectsPassingTest:^BOOL(YTReelModel *obj, NSUInteger idx, BOOL *stop) {
-        return [obj respondsToSelector:@selector(videoType)] ? obj.videoType == 3 : NO;
-    }]];
-    %orig;
-}
 
 %end
 
