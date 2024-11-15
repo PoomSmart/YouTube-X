@@ -1,6 +1,7 @@
 #import <YouTubeHeader/YTIElementRenderer.h>
 #import <YouTubeHeader/YTInnerTubeCollectionViewController.h>
 #import <YouTubeHeader/YTISectionListRenderer.h>
+#import <YouTubeHeader/YTReelModel.h>
 #import <HBLog.h>
 
 %hook YTVersionUtils
@@ -94,6 +95,17 @@
 
 %end
 
+%hook YTReelInfinitePlaybackDataSource
+
+- (YTReelModel *)makeContentModelForEntry:(id)entry {
+    YTReelModel *model = %orig;
+    if ([model respondsToSelector:@selector(videoType)] && model.videoType == 3)
+        return nil;
+    return model;
+}
+
+%end
+
 NSString *getAdString(NSString *description) {
     if ([description containsString:@"brand_promo"])
         return @"brand_promo";
@@ -101,6 +113,8 @@ NSString *getAdString(NSString *description) {
         return @"carousel_footered_layout";
     if ([description containsString:@"carousel_headered_layout"])
         return @"carousel_headered_layout";
+    if ([description containsString:@"eml.expandable_metadata"])
+        return @"eml.expandable_metadata";
     if ([description containsString:@"feed_ad_metadata"])
         return @"feed_ad_metadata";
     if ([description containsString:@"full_width_portrait_image_layout"])
