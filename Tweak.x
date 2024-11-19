@@ -1,3 +1,4 @@
+#import <YouTubeHeader/_ASDisplayView.h>
 #import <YouTubeHeader/YTIElementRenderer.h>
 #import <YouTubeHeader/YTInnerTubeCollectionViewController.h>
 #import <YouTubeHeader/YTISectionListRenderer.h>
@@ -168,6 +169,16 @@ static NSMutableArray <YTIItemSectionRenderer *> *filteredArray(NSArray <YTIItem
     [newArray removeObjectsAtIndexes:removeIndexes];
     return newArray;
 }
+
+%hook _ASDisplayView
+
+- (void)didMoveToWindow {
+    %orig;
+    if (([self.accessibilityIdentifier isEqualToString:@"eml.expandable_metadata.vpp"]))
+        [self removeFromSuperview];
+}
+
+%end
 
 %hook YTInnerTubeCollectionViewController
 
