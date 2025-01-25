@@ -25,8 +25,6 @@
 
 %hook YTIPlayerResponse
 
-- (BOOL)isMonetized { return NO; }
-
 %new(@@:)
 - (NSMutableArray *)playerAdsArray {
     return [NSMutableArray array];
@@ -55,6 +53,13 @@
 %hook MLVideo
 
 - (BOOL)playableInBackground { return YES; }
+
+%end
+
+%hook YTIBackgroundOfflineSettingCategoryEntryRenderer
+
+%new(B@:)
+- (BOOL)isBackgroundEnabled { return YES; }
 
 %end
 
