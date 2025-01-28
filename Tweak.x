@@ -72,7 +72,7 @@
 
 %hook YTDataUtils
 
-+ (id)spamSignalsDictionary { return @{}; }
++ (id)spamSignalsDictionary { return @{ @"ms": @"" }; }
 + (id)spamSignalsDictionaryWithoutIDFA { return @{}; }
 
 %end
