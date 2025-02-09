@@ -2,6 +2,7 @@
 #import <YouTubeHeader/YTIElementRenderer.h>
 #import <YouTubeHeader/YTInnerTubeCollectionViewController.h>
 #import <YouTubeHeader/YTISectionListRenderer.h>
+#import <YouTubeHeader/YTIShelfRenderer.h>
 #import <YouTubeHeader/YTReelModel.h>
 #import <HBLog.h>
 
@@ -110,6 +111,13 @@
     return model;
 }
 
+- (void)setReels:(NSMutableOrderedSet <YTReelModel *> *)reels {
+    [reels removeObjectsAtIndexes:[reels indexesOfObjectsPassingTest:^BOOL(YTReelModel *obj, NSUInteger idx, BOOL *stop) {
+        return [obj respondsToSelector:@selector(videoType)] ? obj.videoType == 3 : NO;
+    }]];
+    %orig;
+}
+
 %end
 
 NSString *getAdString(NSString *description) {
@@ -157,6 +165,16 @@ static BOOL isAdRenderer(YTIElementRenderer *elementRenderer, int kind) {
 static NSMutableArray <YTIItemSectionRenderer *> *filteredArray(NSArray <YTIItemSectionRenderer *> *array) {
     NSMutableArray <YTIItemSectionRenderer *> *newArray = [array mutableCopy];
     NSIndexSet *removeIndexes = [newArray indexesOfObjectsPassingTest:^BOOL(YTIItemSectionRenderer *sectionRenderer, NSUInteger idx, BOOL *stop) {
+        if ([sectionRenderer isKindOfClass:%c(YTIShelfRenderer)]) {
+            YTIShelfSupportedRenderers *content = ((YTIShelfRenderer *)sectionRenderer).content;
+            YTIHorizontalListRenderer *horizontalListRenderer = content.horizontalListRenderer;
+            NSMutableArray <YTIHorizontalListSupportedRenderers *> *itemsArray = horizontalListRenderer.itemsArray;
+            NSIndexSet *removeItemsArrayIndexes = [itemsArray indexesOfObjectsPassingTest:^BOOL(YTIHorizontalListSupportedRenderers *horizontalListSupportedRenderers, NSUInteger idx2, BOOL *stop2) {
+                YTIElementRenderer *elementRenderer = horizontalListSupportedRenderers.elementRenderer;
+                return isAdRenderer(elementRenderer, 4);
+            }];
+            [itemsArray removeObjectsAtIndexes:removeItemsArrayIndexes];
+        }
         if (![sectionRenderer isKindOfClass:%c(YTIItemSectionRenderer)])
             return NO;
         NSMutableArray <YTIItemSectionSupportedRenderers *> *contentsArray = sectionRenderer.contentsArray;
