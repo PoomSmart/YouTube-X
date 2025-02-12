@@ -12,7 +12,7 @@ else
 endif
 
 INSTALL_TARGET_PROCESSES = YouTube
-PACKAGE_VERSION = 1.7.8
+PACKAGE_VERSION = 1.7.9
 
 include $(THEOS)/makefiles/common.mk
 
