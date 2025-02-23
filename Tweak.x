@@ -146,11 +146,13 @@ static BOOL isProductList(YTICommand *command) {
 
 - (void)loadWithModel:(YTIWatchNextResponse *)model {
     YTICommand *onUiReady = model.onUiReady;
-    YTICommandExecutorCommand *commandExecutorCommand = [onUiReady yt_commandExecutorCommand];
-    NSMutableArray <YTICommand *> *commandsArray = commandExecutorCommand.commandsArray;
-    [commandsArray removeObjectsAtIndexes:[commandsArray indexesOfObjectsPassingTest:^BOOL(YTICommand *command, NSUInteger idx, BOOL *stop) {
-        return isProductList(command);
-    }]];
+    if ([onUiReady respondsToSelector:@selector(yt_commandExecutorCommand)]) {
+        YTICommandExecutorCommand *commandExecutorCommand = [onUiReady yt_commandExecutorCommand];
+        NSMutableArray <YTICommand *> *commandsArray = commandExecutorCommand.commandsArray;
+        [commandsArray removeObjectsAtIndexes:[commandsArray indexesOfObjectsPassingTest:^BOOL(YTICommand *command, NSUInteger idx, BOOL *stop) {
+            return isProductList(command);
+        }]];
+    }
     if (isProductList(onUiReady))
         model.onUiReady = nil;
     %orig;
