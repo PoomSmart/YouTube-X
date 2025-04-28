@@ -19,6 +19,13 @@
     return appVersion;
 }
 
++ (NSString *)appVersion {
+    NSString *appVersion = %orig;
+    if ([appVersion compare:@"17.10.2" options:NSNumericSearch] == NSOrderedAscending)
+        return @"19.14.2";
+    return appVersion;
+}
+
 %end
 
 %hook YTGlobalConfig
