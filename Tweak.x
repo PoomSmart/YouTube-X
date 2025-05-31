@@ -61,6 +61,12 @@
 
 %end
 
+%hook YTHotConfig
+
+- (BOOL)clientInfraClientConfigIosEnableFillingEncodedHacksInnertubeContext { return NO; }
+
+%end
+
 %hook MLVideo
 
 - (BOOL)playableInBackground { return YES; }
@@ -197,7 +203,7 @@ NSString *getAdString(NSString *description) {
         @"text_search_ad",
         @"video_display_full_layout",
         @"video_display_full_buttoned_layout"
-    ]) 
+    ])
         if ([description containsString:str]) return str;
 
     return nil;
