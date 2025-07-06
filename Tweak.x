@@ -9,25 +9,6 @@
 #import <YouTubeHeader/YTReelModel.h>
 #import <HBLog.h>
 
-%hook YTVersionUtils
-
-// Works down to 17.x.x
-+ (NSString *)appVersionLong {
-    NSString *appVersion = %orig;
-    if ([appVersion compare:@"19.01.1" options:NSNumericSearch] == NSOrderedAscending)
-        return @"19.01.1";
-    return appVersion;
-}
-
-+ (NSString *)appVersion {
-    NSString *appVersion = %orig;
-    if ([appVersion compare:@"17.10.2" options:NSNumericSearch] == NSOrderedAscending)
-        return @"19.14.2";
-    return appVersion;
-}
-
-%end
-
 %hook YTGlobalConfig
 
 - (BOOL)shouldBlockUpgradeDialog { return YES; }
