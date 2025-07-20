@@ -9,12 +9,6 @@
 #import <YouTubeHeader/YTReelModel.h>
 #import <HBLog.h>
 
-%hook YTGlobalConfig
-
-- (BOOL)shouldBlockUpgradeDialog { return YES; }
-
-%end
-
 %hook YTIPlayerResponse
 
 %new(@@:)
