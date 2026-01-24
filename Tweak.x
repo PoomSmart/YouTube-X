@@ -27,9 +27,17 @@
     return [NSMutableArray array];
 }
 
+- (BOOL)isPlayableInBackground { return YES; }
+
 %end
 
 %hook YTIPlayabilityStatus
+
+- (BOOL)isPlayableInBackground { return YES; }
+
+%end
+
+%hook YTPlaybackData
 
 - (BOOL)isPlayableInBackground { return YES; }
 
@@ -45,12 +53,6 @@
 %hook YTHotConfig
 
 - (BOOL)clientInfraClientConfigIosEnableFillingEncodedHacksInnertubeContext { return NO; }
-
-%end
-
-%hook MLVideo
-
-- (BOOL)playableInBackground { return YES; }
 
 %end
 
