@@ -43,6 +43,18 @@
 
 %end
 
+%hook MLVideo
+
+- (BOOL)playableInBackground { return YES; }
+
+%end
+
+%hook HAMPlayer
+
+- (BOOL)allowsBackgroundPlayback { return YES; }
+
+%end
+
 %hook YTIClientMdxGlobalConfig
 
 %new(B@:)
