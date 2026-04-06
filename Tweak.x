@@ -75,18 +75,6 @@
 
 %end
 
-%hook YTAdsInnerTubeContextDecorator
-
-- (void)decorateContext:(id)context { %orig(nil); }
-
-%end
-
-%hook YTAccountScopedAdsInnerTubeContextDecorator
-
-- (void)decorateContext:(id)context { %orig(nil); }
-
-%end
-
 %hook YTLocalPlaybackController
 
 - (id)createAdsPlaybackCoordinator { return nil; }
