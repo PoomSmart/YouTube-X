@@ -87,6 +87,12 @@
 
 %end
 
+%hook MDXSessionImpl
+
+- (void)adPlaying:(id)ad {}
+
+%end
+
 %hook YTReelDataSource
 
 - (YTReelModel *)makeContentModelForEntry:(id)entry {
