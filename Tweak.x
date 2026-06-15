@@ -159,6 +159,7 @@ static BOOL isProductList(YTICommand *command) {
 NSString *getAdString(NSString *description) {
     for (NSString *str in @[
         @"brand_promo",
+        @"brand_video_singleton",
         @"carousel_footered_layout",
         @"carousel_headered_layout",
         @"eml.expandable_metadata",
