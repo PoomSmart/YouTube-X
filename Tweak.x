@@ -104,6 +104,18 @@
 
 %end
 
+// For newer YouTube versions
+%hook YTReelContentModel
+
++ (YTReelModel *)makeContentModelForEntry:(id)entry {
+    YTReelModel *model = %orig;
+    if ([model respondsToSelector:@selector(videoType)] && model.videoType == 3)
+        return nil;
+    return model;
+}
+
+%end
+
 %hook YTReelInfinitePlaybackDataSource
 
 - (YTReelModel *)makeContentModelForEntry:(id)entry {
