@@ -252,6 +252,17 @@ static NSMutableArray <YTIItemSectionRenderer *> *filteredArray(NSArray <YTIItem
     return newArray;
 }
 
+// Inline feed ads are inserted through externally managed ad slots after the
+// section renderers have been filtered. Reject these slots before they bind a
+// YTAdVideoElementsCellController to the collection view.
+%hook YTAdElementsCellExternallyManagedSlotAdapterImpl
+
+- (BOOL)isValidSlotType:(int)type {
+    return NO;
+}
+
+%end
+
 %hook _ASDisplayView
 
 - (void)didMoveToWindow {
